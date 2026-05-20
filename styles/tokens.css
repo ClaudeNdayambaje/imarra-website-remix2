@@ -1,0 +1,180 @@
+/* =========================================================================
+   IMARRA — Design tokens (colors + type)
+   Single source of truth for brand. Load this first, then product styles.
+
+   Règle d'or: jamais plus de 2 couleurs fortes à l'écran.
+   L'ORANGE est l'accent. Le reste est BLANC + NOIR.
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&family=Ubuntu+Mono:wght@400;700&display=swap');
+
+:root {
+  /* -------- Brand (orange) -------- */
+  --imarra-orange:        #f97316;  /* principal — CTA, mots-clés, accent */
+  --imarra-orange-hover:  #ea580c;  /* hover / pressé */
+  --imarra-orange-ring:   rgba(249, 115, 22, 0.12); /* focus ring @ 12% */
+  --imarra-orange-tint:   rgba(249, 115, 22, 0.08); /* hover surface very soft */
+
+  /* -------- Text / neutrals -------- */
+  --imarra-black:         #111827;  /* texte principal */
+  --imarra-ink-700:       #1f2937;  /* surfaces sombres, modales dark */
+  --imarra-ink-500:       #6b7280;  /* texte secondaire, légendes */
+  --imarra-ink-400:       #9ca3af;  /* placeholder */
+  --imarra-ink-300:       #d1d5db;  /* bordure input */
+  --imarra-ink-200:       #e5e7eb;  /* bordure carte, séparateur */
+  --imarra-ink-100:       #f3f4f6;  /* surface very subtle */
+  --imarra-ink-50:        #f9fafb;  /* wash */
+  --imarra-white:         #ffffff;  /* fond dominant */
+
+  /* -------- Print / docs only -------- */
+  --imarra-navy:          #0a3d62;  /* H1 de documents imprimés UNIQUEMENT */
+
+  /* -------- Semantic (POS / dashboard) -------- */
+  --imarra-success:       #16a34a;
+  --imarra-warning:       #f59e0b;
+  --imarra-danger:        #dc2626;
+  --imarra-info:          #2563eb;
+
+  /* -------- Semantic tokens -------- */
+  --fg-1:                 var(--imarra-black);
+  --fg-2:                 var(--imarra-ink-500);
+  --fg-muted:             var(--imarra-ink-400);
+  --fg-on-accent:         var(--imarra-white);
+
+  --bg-app:               var(--imarra-white);
+  --bg-wash:              var(--imarra-ink-50);
+  --bg-card:              var(--imarra-white);
+  --bg-sunken:            var(--imarra-ink-100);
+  --bg-inverse:           var(--imarra-ink-700);
+
+  --border-subtle:        var(--imarra-ink-200);
+  --border-input:         var(--imarra-ink-300);
+  --border-strong:        var(--imarra-black);
+
+  --accent:               var(--imarra-orange);
+  --accent-hover:         var(--imarra-orange-hover);
+  --accent-ring:          var(--imarra-orange-ring);
+  --accent-tint:          var(--imarra-orange-tint);
+
+  /* -------- Radius (Imarra prefers soft, not pill) -------- */
+  --r-sm:  6px;
+  --r-md:  10px;  /* boutons */
+  --r-lg:  12px;  /* cartes */
+  --r-xl:  16px;
+  --r-pill: 9999px; /* pilule logo, tags */
+
+  /* -------- Shadow (ombres douces, jamais criardes) -------- */
+  --shadow-xs: 0 1px 2px rgba(17, 24, 39, 0.04);
+  --shadow-sm: 0 1px 3px rgba(17, 24, 39, 0.06), 0 1px 2px rgba(17, 24, 39, 0.04);
+  --shadow-md: 0 4px 10px rgba(17, 24, 39, 0.06), 0 2px 4px rgba(17, 24, 39, 0.04);
+  --shadow-lg: 0 12px 28px rgba(17, 24, 39, 0.08), 0 4px 10px rgba(17, 24, 39, 0.05);
+  --shadow-focus: 0 0 0 3px var(--accent-ring);
+
+  /* -------- Spacing (4-point grid) -------- */
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  20px;
+  --s-6:  24px;
+  --s-8:  32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+  --s-20: 80px;
+  --s-24: 96px;
+
+  /* -------- Typography: base -------- */
+  --font-sans: 'Ubuntu', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Ubuntu Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --fw-light:    300;
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-bold:     700;
+
+  --lh-tight:    1.1;
+  --lh-snug:     1.25;
+  --lh-normal:   1.5;
+  --lh-relaxed:  1.7;
+
+  --tracking-title: -0.01em;
+  --tracking-caps:   0.06em;
+
+  /* -------- Typography: type scale (screen, 16px base) -------- */
+  --t-display:   clamp(44px, 5.5vw, 72px);  /* hero commercial */
+  --t-h1:        clamp(32px, 3.6vw, 48px);
+  --t-h2:        28px;
+  --t-h3:        22px;
+  --t-h4:        18px;
+  --t-body-lg:   18px;
+  --t-body:      16px;
+  --t-body-sm:   14px;
+  --t-caption:   13px;
+  --t-micro:     12px;
+
+  /* -------- Motion -------- */
+  --ease-std: cubic-bezier(.4, 0, .2, 1);
+  --ease-out: cubic-bezier(0, 0, .2, 1);
+  --dur-fast: 120ms;
+  --dur-med:  200ms;
+  --dur-slow: 320ms;
+}
+
+/* =========================================================================
+   Semantic element defaults — drop in and get Imarra typography for free.
+   ========================================================================= */
+
+html, body {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-regular);
+  color: var(--fg-1);
+  background: var(--bg-app);
+  font-size: var(--t-body);
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-bold);
+  color: var(--fg-1);
+  letter-spacing: var(--tracking-title);
+  line-height: var(--lh-tight);
+  margin: 0;
+}
+
+h1 { font-size: var(--t-h1); text-transform: uppercase; }
+h2 { font-size: var(--t-h2); text-transform: uppercase; }
+h3 { font-size: var(--t-h3); }
+h4 { font-size: var(--t-h4); }
+
+p  { font-size: var(--t-body); line-height: var(--lh-relaxed); color: var(--fg-1); margin: 0 0 var(--s-4); }
+small, .caption { font-size: var(--t-caption); color: var(--fg-2); }
+
+/* The signature Imarra title: bold uppercase, one keyword in orange. */
+.t-accent { color: var(--accent); }
+
+/* Eyebrow / kicker above titles — uppercase, tracked, secondary color */
+.eyebrow {
+  font-size: var(--t-caption);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-caps);
+  color: var(--fg-2);
+}
+
+/* Baseline à poser discrètement en bas de page */
+.baseline {
+  font-size: var(--t-caption);
+  color: var(--fg-2);
+  letter-spacing: 0.01em;
+}
+
+/* Print-only — H1 en bleu marine pour les brochures imprimées */
+@media print {
+  .print-h1 { color: var(--imarra-navy); }
+}
+
+code, kbd, samp, pre { font-family: var(--font-mono); font-size: 0.95em; }

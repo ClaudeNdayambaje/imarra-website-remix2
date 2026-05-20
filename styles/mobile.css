@@ -1,0 +1,200 @@
+/* =========================================================================
+   IMARRA — Mobile optimizations
+   Loads AFTER site.css. Overrides inline JSX padding/margins for phones.
+   ========================================================================= */
+
+/* ============ TABLET PORTRAIT & SMALLER (≤ 900px) ============ */
+@media (max-width: 900px) {
+
+  /* Section headers — pull bottom margin down */
+  .section-header {
+    margin-bottom: 40px !important;
+  }
+
+  /* Cards: cap padding (beats inline JSX styles) */
+  .card { padding: 24px !important; }
+
+  /* In-action rows — taller image */
+  .in-action-row > *:first-child {
+    min-height: 280px !important;
+  }
+  .in-action-row > *:last-child {
+    padding: 28px !important;
+  }
+
+  /* Header: tighter padding so it doesn't eat too much vertical space */
+  header > .container {
+    padding: 14px 20px !important;
+    gap: 16px !important;
+  }
+}
+
+/* ============ PHONE (≤ 700px) ============ */
+@media (max-width: 700px) {
+
+  /* === Spacing / rhythm === */
+  .section-header { margin-bottom: 28px !important; }
+  .section-header h2 { margin-bottom: 12px !important; }
+
+  /* Universal card padding floor */
+  .card { padding: 20px !important; }
+
+  /* Inner content padding of cards-as-links (Ecosystem) */
+  a.card > div:last-child { padding: 20px !important; }
+
+  /* === Trust strip — logo wall === */
+  .logo-wall {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 12px !important;
+  }
+  .logo-wall .ph {
+    height: 34px;
+    font-size: 11px;
+  }
+
+  /* === In-Action rows === */
+  .in-action-row {
+    min-height: 0 !important;
+  }
+  .in-action-row > *:first-child {
+    min-height: 260px !important;
+    aspect-ratio: 16 / 11;
+  }
+  .in-action-row > *:last-child {
+    padding: 24px !important;
+  }
+  .in-action-row h3.h3 {
+    font-size: 22px !important;
+  }
+
+  /* === Hero — softer aspect and tighter cushion === */
+  .home-hero { padding: 24px 0 16px !important; }
+  .home-hero .pill {
+    font-size: 10.5px;
+    padding: 5px 10px;
+  }
+  .hero-visual {
+    border-radius: 14px !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+  .hero-visual > div:nth-child(n) { /* tighten floating metric card */ }
+
+  /* Carousel dots row: wrap counter onto its own line */
+  .home-hero [role="tablist"] {
+    flex-wrap: wrap;
+    gap: 8px !important;
+  }
+  .home-hero [role="tablist"] > span:last-child {
+    margin-left: 0 !important;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  /* === Form inputs: 16px font prevents iOS zoom on focus === */
+  .input, .textarea, .select { font-size: 16px !important; }
+  .field { margin-bottom: 14px !important; }
+  .label { font-size: 12.5px !important; }
+
+  /* === Footer copyright row: stack cleanly === */
+  footer .container > div:last-of-type {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  /* === CTA Band badges — tighter wrap === */
+  section.dark .container > div:last-child {
+    gap: 10px 18px !important;
+    font-size: 12.5px;
+  }
+
+  /* === Mobile nav panel === */
+  .nav-mobile-panel a {
+    font-size: 16px !important;
+    padding: 14px 4px !important;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .nav-mobile-panel a:last-of-type { border-bottom: 0; }
+
+  /* === Eyebrow tighter === */
+  .eyebrow { margin-bottom: 10px !important; }
+
+  /* === Hero buttons: ensure full width and tap-friendly === */
+  .hero-buttons .btn { width: 100%; }
+
+  /* === Product-detail other-licenses card: keep arrow visible === */
+  a.card[href^="#/produits/"] {
+    flex-wrap: wrap;
+  }
+
+  /* === Detail hero photo: avoid super-wide aspect === */
+  section[data-grid] + section,
+  [data-grid="detail-hero"] > div:last-child {
+    aspect-ratio: 5 / 4 !important;
+  }
+
+  /* === Kiosk-video status pill: shrink on small screens === */
+  .kiosk-video-status {
+    top: 12px !important;
+    left: 12px !important;
+    font-size: 10px !important;
+    padding: 5px 9px !important;
+  }
+  .kiosk-video-controls {
+    bottom: 12px !important;
+    right: 12px !important;
+  }
+
+  /* === FAQ — tighter rows === */
+  .faq-row > button { padding: 16px 18px !important; }
+  .faq-row > div { padding: 0 18px 18px !important; }
+  .faq-row > button > span:first-child { font-size: 14.5px !important; }
+
+  /* === Catalogue anchor nav offsets === */
+  .cat-anchor-nav { padding: 12px 0 !important; }
+}
+
+/* ============ VERY SMALL (≤ 420px) ============ */
+@media (max-width: 420px) {
+  .logo-wall { grid-template-columns: repeat(2, 1fr) !important; }
+  .section-header { margin-bottom: 22px !important; }
+  .partner-stats-row { gap: 14px !important; }
+  .card { padding: 18px !important; }
+  .home-hero { padding: 20px 0 10px !important; }
+  .h-display { font-size: 28px !important; line-height: 1 !important; }
+  .h1 { font-size: 24px !important; }
+  .h2 { font-size: 22px !important; }
+}
+
+/* ============ TOUCH UX ============ */
+@media (pointer: coarse) {
+  a.card, .pill, button, .btn { -webkit-tap-highlight-color: rgba(249,115,22,0.1); }
+  .nav-mobile-btn { min-height: 44px; min-width: 44px; }
+}
+
+/* Disable hover lift on touch (no hover state really exists) */
+@media (hover: none) {
+  .card-hover:hover {
+    transform: none;
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* ============ MOBILE NAV — full-screen drawer ============ */
+@media (max-width: 900px) {
+  .nav-mobile-panel {
+    position: fixed;
+    top: 60px;
+    left: 0; right: 0; bottom: 0;
+    background: #fff;
+    padding: 20px 20px 32px !important;
+    overflow-y: auto;
+    z-index: 49;
+    animation: navSlideIn 220ms var(--ease-std);
+  }
+  body.nav-locked { overflow: hidden; }
+}
+@keyframes navSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
