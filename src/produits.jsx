@@ -37,7 +37,7 @@ const getLicenses = () => ({
                de:'10,1"-Kassierbildschirm, 4,3"-Kundendisplay, Thermodrucker 80 mm und 1D/2D-Scanner — alles integriert, nichts anzuschließen. Ultrakompaktes Format für Bäckereien, Imbisse, Food-Trucks und Shop-in-Shops, wo jeder Zentimeter Tresen zählt. In fünf Minuten installiert, nahezu wartungsfrei.'}),
     },
     video: {
-      src: 'assets/videos/sunmi-t3pro-usage.mp4',
+      src: 'https://storage.googleapis.com/logiciel-de-caisse-7e58e.firebasestorage.app/videos%20siteweb%20imarra%2Fsunmi-t3pro-usage.mp4',
       poster: 'assets/photos/imarra-pos-bar-counter.jpg',
       eyebrow: 'Imarra POS · Sunmi T3 PRO',
       title: t({fr:'L’ENCAISSEMENT EN 8 SECONDES. SANS LEVER LES YEUX.',
@@ -50,7 +50,7 @@ const getLicenses = () => ({
                de:'Der Kunde bestellt, die Kasse kassiert, der Bon geht in die Küche. Doppelter Bildschirm: Ihr Team arbeitet auf der einen, der Kunde sieht die Preise auf der anderen Seite. Für Mittags-, Abend- und Wochenendansturm.'}),
     },
     video2: {
-      src: 'assets/videos/sunmi-d3mini-usage.mp4',
+      src: 'https://storage.googleapis.com/logiciel-de-caisse-7e58e.firebasestorage.app/videos%20siteweb%20imarra%2Fsunmi-d3mini-usage.mp4',
       poster: 'assets/photos/products/d3-mini-hero.png',
       eyebrow: 'Imarra POS · Sunmi D3 Mini',
       title: t({fr:'TOUT LE COMPTOIR EN 25 CM.',
@@ -166,7 +166,7 @@ const getLicenses = () => ({
     photoFit: 'cover',
     photoBg: '#1f2937',
     video: {
-      src: 'assets/videos/sunmi-flex3-usage.mp4',
+      src: 'https://storage.googleapis.com/logiciel-de-caisse-7e58e.firebasestorage.app/videos%20siteweb%20imarra%2Fsunmi-flex3-usage.mp4',
       poster: 'assets/photos/products/kiosk-flex-resto.png',
       eyebrow: t({fr:'Imarra Kiosk · en utilisation', nl:'Imarra Kiosk · in gebruik', en:'Imarra Kiosk · in use', de:'Imarra Kiosk · im Einsatz'}),
       title: t({fr:'SCANNE. PAIE. PART. EN MOINS DE 30 SECONDES.',
@@ -272,7 +272,7 @@ const getLicenses = () => ({
     photoBg: '#1f1a14',
     photoSecondary: 'assets/photos/sunmi-p3-in-situ.jpg',
     video: {
-      src: 'assets/videos/sunmi-m3-usage.mp4',
+      src: 'https://storage.googleapis.com/logiciel-de-caisse-7e58e.firebasestorage.app/videos%20siteweb%20imarra%2Fsunmi-m3-usage.mp4',
       poster: 'assets/photos/products/m3.png',
       eyebrow: 'Imarra Mobile · Sunmi M3',
       title: t({fr:'LA COMMANDE PRISE À TABLE. LE TICKET DÉJÀ EN CUISINE.',

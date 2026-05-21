@@ -493,7 +493,12 @@ function Nav({ route }) {
       <style>{`
         @media (max-width: 900px) {
           .nav-desktop { display: none !important; }
-          .nav-mobile-btn { display: block !important; }
+          .nav-mobile-btn {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            margin-left: auto !important;
+          }
           .nav-mobile-panel { display: block !important; }
         }
       `}</style>
