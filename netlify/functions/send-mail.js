@@ -64,6 +64,7 @@ const BRAND = {
   ink2: '#6b7280',
   border: '#e5e7eb',
   bg: '#f9fafb',
+  logoUrl: process.env.MAIL_LOGO_URL || 'https://imarra.io/assets/imarra-logo.png',
 };
 
 const baseEmail = ({ preheader, title, intro, body, ctaLabel, ctaUrl, footer }) => `<!doctype html>
@@ -75,9 +76,7 @@ const baseEmail = ({ preheader, title, intro, body, ctaLabel, ctaUrl, footer }) 
   <tr><td align="center">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border:1px solid ${BRAND.border};border-radius:14px;overflow:hidden;">
       <tr><td style="padding:28px 32px 12px;">
-        <div style="font-weight:700;font-size:22px;letter-spacing:-0.02em;color:${BRAND.ink};">
-          <span style="color:${BRAND.ink};">im</span><span style="color:${BRAND.orange};">arra</span>
-        </div>
+        <img src="${BRAND.logoUrl}" alt="Imarra" width="120" height="auto" style="display:block;height:auto;width:120px;max-width:120px;border:0;outline:none;text-decoration:none;" />
       </td></tr>
       <tr><td style="padding:8px 32px 8px;">
         <h1 style="margin:0 0 12px;font-size:22px;line-height:1.25;font-weight:700;letter-spacing:-0.01em;color:${BRAND.ink};">${title}</h1>
