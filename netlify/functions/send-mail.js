@@ -210,6 +210,17 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers: cors, body: JSON.stringify({ ok: false, error: 'Method not allowed' }) };
   }
+  // --- DEBUG: log env var availability (no values, just presence) ---
+  console.log('[send-mail] env check', {
+    has_SMTP_PASS: !!process.env.SMTP_PASS,
+    SMTP_PASS_len: (process.env.SMTP_PASS || '').length,
+    has_SMTP_USER: !!process.env.SMTP_USER,
+    SMTP_USER_val: process.env.SMTP_USER || '(default)',
+    has_SMTP_HOST: !!process.env.SMTP_HOST,
+    has_SMTP_PORT: !!process.env.SMTP_PORT,
+    netlify_keys_sample: Object.keys(process.env).filter(k => /SMTP|MAIL/i.test(k)),
+    total_env_keys: Object.keys(process.env).length,
+  });
   if (!SMTP_PASS) {
     console.error('Missing SMTP_PASS env var');
     return { statusCode: 500, headers: cors, body: JSON.stringify({ ok: false, error: 'Email service not configured' }) };
