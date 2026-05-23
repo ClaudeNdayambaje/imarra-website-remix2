@@ -147,35 +147,6 @@ function HomeHero() {
               </span>
             ))}
           </div>
-          {/* Carousel dots */}
-          <div role="tablist" aria-label="Hero carousel" style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            {slides.map((sl, idx) => {
-              const active = idx === i;
-              return (
-                <button
-                  key={sl.key}
-                  role="tab"
-                  aria-selected={active}
-                  aria-label={sl.accent}
-                  onClick={() => goTo(idx)}
-                  style={{
-                    appearance: 'none',
-                    border: 0,
-                    padding: 0,
-                    cursor: 'pointer',
-                    height: 8,
-                    width: active ? 32 : 8,
-                    borderRadius: 999,
-                    background: active ? 'var(--accent)' : 'var(--imarra-ink-200)',
-                    transition: 'width 320ms cubic-bezier(.4,0,.2,1), background 200ms',
-                  }}
-                />
-              );
-            })}
-            <span style={{ marginLeft: 8, fontSize: 11, color: 'var(--fg-2)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 500 }}>
-              {String(i + 1).padStart(2, '0')} / {String(slides.length).padStart(2, '0')} · {s.accent}
-            </span>
-          </div>
         </div>
 
         <HeroVisual slides={slides} active={i} />
