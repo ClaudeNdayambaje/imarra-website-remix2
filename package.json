@@ -1,0 +1,9 @@
+{
+  "name": "imarra-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Imarra marketing website — static HTML + React (CDN). Netlify Functions for email.",
+  "dependencies": {
+    "nodemailer": "^6.9.16"
+  }
+}

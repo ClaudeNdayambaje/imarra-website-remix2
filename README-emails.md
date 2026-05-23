@@ -1,94 +1,91 @@
 # 📧 Configuration des emails — site Imarra
 
-Ce document explique comment fonctionne l'envoi de mails depuis les formulaires
-du site (modale "Réserver une démo" + page Contact) et **ce que vous devez
-faire vous-même** pour activer le système.
-
----
+Les formulaires du site (modale "Réserver une démo" + page Contact) envoient
+les emails via **SMTP Hostinger**, en utilisant la boîte `contact@imarra.be`.
 
 ## Architecture
 
 ```
 [Formulaire site]
       ↓ POST /.netlify/functions/send-mail
-[Netlify Function (Node.js)]
-      ↓ Resend API (clé secrète)
-[Resend]
+[Netlify Function (Node.js + nodemailer)]
+      ↓ SMTP (smtp.hostinger.com:465)
+[Hostinger Mail]
   ├─→ contact@imarra.be     (notification interne, ou support@imarra.io si "Question technique")
   └─→ email du client       (accusé de réception personnalisé)
 ```
 
-Code de la fonction : `netlify/functions/send-mail.js`.
+Code : `netlify/functions/send-mail.js`. Dépendance : `nodemailer` (déclarée
+dans `package.json`).
 
-## Variables d'environnement requises (à configurer sur Netlify)
+## Variables d'environnement (à configurer sur Netlify)
 
-| Nom               | Valeur                                  | Obligatoire |
-|-------------------|-----------------------------------------|-------------|
-| `RESEND_API_KEY`  | clé API Resend (commence par `re_...`)  | ✅ |
-| `MAIL_FROM`       | `Imarra <contact@imarra.be>`            | recommandé  |
-| `MAIL_TO`         | `contact@imarra.be`                     | recommandé  |
-| `MAIL_TO_SUPPORT` | `support@imarra.io`                     | recommandé  |
+| Nom               | Valeur                            | Obligatoire | Défaut si non défini       |
+|-------------------|-----------------------------------|-------------|----------------------------|
+| `SMTP_PASS`       | mot de passe de `contact@imarra.be` | ✅          | —                          |
+| `SMTP_USER`       | `contact@imarra.be`                 | recommandé  | `contact@imarra.be`        |
+| `SMTP_HOST`       | `smtp.hostinger.com`                | non         | `smtp.hostinger.com`       |
+| `SMTP_PORT`       | `465`                               | non         | `465` (SSL)                |
+| `MAIL_FROM`       | `Imarra <contact@imarra.be>`        | non         | `Imarra <${SMTP_USER}>`    |
+| `MAIL_TO`         | `contact@imarra.be`                 | non         | `contact@imarra.be`        |
+| `MAIL_TO_SUPPORT` | `support@imarra.io`                 | non         | `support@imarra.io`        |
 
-Si les 3 dernières ne sont pas définies, les valeurs par défaut du code seront utilisées.
+> **Seul `SMTP_PASS` est strictement obligatoire.** Tout le reste a un défaut sensé.
 
----
+## Étapes d'activation
 
-## Étape 1 — Créer un compte Resend (~5 min)
+### 1. Récupérer le mot de passe de `contact@imarra.be`
 
-1. Aller sur https://resend.com → **Sign up**.
-2. Confirmer l'email.
+- Si vous le connaissez déjà → parfait, gardez-le sous la main.
+- Sinon : Hostinger hPanel → **Emails** → cliquer sur `contact@imarra.be` →
+  **Change password** → définir un nouveau mot de passe fort.
 
-## Étape 2 — Vérifier le domaine `imarra.be` (~10 min + propagation DNS)
+### 2. Déployer sur Netlify
 
-1. Dashboard Resend → **Domains** → **Add Domain** → entrer `imarra.be`.
-2. Resend affiche **plusieurs enregistrements DNS** (TXT pour SPF, CNAME pour DKIM, TXT pour DMARC).
-3. Aller chez votre registrar (OVH / Gandi / Cloudflare / etc.) et **ajouter ces enregistrements**
-   exactement tels qu'affichés par Resend.
-4. Revenir sur Resend, cliquer **Verify**. Si rouge, attendre 10-30 min puis re-cliquer.
-5. Tous verts ✅ → vous pouvez envoyer depuis n'importe quelle adresse `@imarra.be`.
-
-> ⚠️ Tant que le domaine n'est pas vérifié, les mails seront refusés par Resend.
-
-## Étape 3 — Créer une clé API Resend
-
-1. Dashboard Resend → **API Keys** → **Create API Key**.
-2. Nom : `imarra-website`. Permission : **Sending access**.
-3. **Copier la clé** (`re_...`). Elle ne sera plus jamais affichée.
-
-## Étape 4 — Déployer sur Netlify
-
-1. https://app.netlify.com → **Add new site** → **Import an existing project**.
-2. Connecter GitHub → choisir `ClaudeNdayambaje/imarra-website-remix2`.
-3. Les paramètres sont déjà dans `netlify.toml` (publish = `.`, functions = `netlify/functions`).
-4. **AVANT de lancer le deploy** : aller dans **Site settings → Environment variables** et
-   ajouter les 4 variables listées plus haut.
+1. https://app.netlify.com → **Add new site** → **Import an existing project**
+2. Connecter GitHub → choisir `ClaudeNdayambaje/imarra-website-remix2`
+3. Build settings (déjà dans `netlify.toml`) :
+   - Publish directory : `.`
+   - Functions directory : `netlify/functions`
+4. **AVANT de cliquer Deploy** → **Site settings → Environment variables** →
+   ajouter au minimum :
+   - `SMTP_PASS` = mot de passe de `contact@imarra.be`
 5. Lancer le deploy.
 
-## Étape 5 — Tester
+### 3. Tester
 
-Sur l'URL Netlify (ex: `imarra-pos.netlify.app`) :
+Sur l'URL Netlify temporaire (ex: `imarra-pos.netlify.app`) :
 - Cliquer "Réserver une démo" → remplir avec **votre propre email** → envoyer.
-- Vérifier que :
-  - `contact@imarra.be` reçoit la notif interne (sujet `[Imarra · DÉMO] ...`).
-  - Votre email reçoit l'accusé de réception.
-- Idem pour le formulaire `/contact` (tester aussi "Question technique" → doit aller à `support@imarra.io`).
-
----
+- Vérifier :
+  - `contact@imarra.be` reçoit la notif interne (sujet `[Imarra · DÉMO] ...`)
+  - Votre email reçoit l'accusé de réception
+- Page `/contact` → tester aussi avec "Question technique" → la notif doit aller à `support@imarra.io`.
 
 ## Sécurité
 
-- La clé API Resend reste **côté serveur Netlify** (jamais exposée au navigateur).
+- Mot de passe SMTP **côté serveur Netlify uniquement** (jamais exposé au navigateur).
 - **Honeypot** anti-spam (champ caché `website`) sur les deux formulaires.
-- **Rate limit** : 5 envois max par IP par minute (côté fonction).
+- **Rate limit** : 5 envois max / IP / minute (en mémoire de l'instance).
 - **Validation** : email valide + nom + entreprise obligatoires.
 
 ## Coûts
 
-- **Resend free** : 3 000 mails / mois (et 100 / jour). Largement suffisant.
-- **Netlify** : free tier inclut 125k invocations de functions / mois.
+- **Hostinger** : déjà inclus dans votre offre mail (pas de surcoût).
+- **Netlify** : free tier inclut 125 000 invocations de functions / mois.
 
 ## Debug
 
-- Logs des envois : **Resend Dashboard → Emails** (chaque envoi listé avec statut).
-- Logs de la fonction : **Netlify Dashboard → Site → Functions → send-mail**.
+- Logs des envois sortants : Hostinger hPanel → **Emails → Email Logs**.
+- Logs de la fonction (erreurs SMTP, etc.) : Netlify Dashboard → **Site → Functions → send-mail**.
 - En cas d'erreur côté client, un message rouge s'affiche sous le bouton "Envoyer".
+
+## Migration future vers un service dédié (Resend / SendGrid / ...)
+
+Si un jour le volume dépasse les capacités Hostinger ou que vous voulez un
+dashboard d'envois pro :
+1. Créer un compte chez le service.
+2. Vérifier le domaine `imarra.be` (DNS).
+3. Remplacer la partie `nodemailer` dans `send-mail.js` par l'appel à l'API du service.
+4. Changer les variables d'env Netlify.
+
+Le code des templates et la logique de routage restent identiques.

@@ -1,23 +1,43 @@
 // =============================================================================
 // Imarra — Netlify Function: send-mail
 // Reçoit un POST JSON depuis les formulaires du site (démo ou contact),
-// envoie 2 mails via Resend :
+// envoie 2 mails via SMTP Hostinger :
 //   1) notification interne -> contact@imarra.be (ou support@imarra.io si tech)
 //   2) accusé de réception personnalisé -> client
 // =============================================================================
 
-const RESEND_ENDPOINT = 'https://api.resend.com/emails';
+const nodemailer = require('nodemailer');
 
-const MAIL_FROM = process.env.MAIL_FROM || 'Imarra <contact@imarra.be>';
+const SMTP_HOST = process.env.SMTP_HOST || 'smtp.hostinger.com';
+const SMTP_PORT = Number(process.env.SMTP_PORT || 465);
+const SMTP_USER = process.env.SMTP_USER || 'contact@imarra.be';
+const SMTP_PASS = process.env.SMTP_PASS;
+
+const MAIL_FROM = process.env.MAIL_FROM || `Imarra <${SMTP_USER}>`;
 const MAIL_TO = process.env.MAIL_TO || 'contact@imarra.be';
 const MAIL_TO_SUPPORT = process.env.MAIL_TO_SUPPORT || 'support@imarra.io';
 
-// Naive in-memory rate limit (process-wide, ephemeral on Netlify cold starts).
-// Sufficient to slow down basic abuse; serious flooding caught by Netlify Edge.
-const recentByIp = new Map();
-const RATE_WINDOW_MS = 60_000; // 1 min
-const RATE_MAX = 5;
+// Reusable transporter (cold-start friendly)
+let transporter = null;
+function getTransporter() {
+  if (transporter) return transporter;
+  transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: SMTP_PORT === 465, // 465 = SSL, 587 = STARTTLS
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
+    pool: false,
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 15_000,
+  });
+  return transporter;
+}
 
+// Naive in-memory rate limit (ephemeral, per-instance)
+const recentByIp = new Map();
+const RATE_WINDOW_MS = 60_000;
+const RATE_MAX = 5;
 function rateLimited(ip) {
   if (!ip) return false;
   const now = Date.now();
@@ -35,7 +55,7 @@ const esc = (v) => String(v ?? '').replace(/[<>&"']/g, c => ({
 const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || '').trim());
 
 // -----------------------------------------------------------------------------
-// HTML templates — branding Imarra (orange #f97316, ink #111827, ubuntu)
+// HTML templates — branding Imarra (orange #f97316, ink #111827)
 // -----------------------------------------------------------------------------
 
 const BRAND = {
@@ -79,10 +99,6 @@ const baseEmail = ({ preheader, title, intro, body, ctaLabel, ctaUrl, footer }) 
 </table>
 </body></html>`;
 
-// -----------------------------------------------------------------------------
-// Templates: notification interne
-// -----------------------------------------------------------------------------
-
 function fieldsTable(rows) {
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">${
     rows.filter(([_, v]) => v != null && v !== '').map(([k, v]) => `
@@ -100,7 +116,7 @@ function internalDemoBody(d) {
     ['N° TVA', d.tva],
     ['Téléphone', d.telephone],
     ['Email', d.email],
-    ['Type d\'activité', d.type],
+    ["Type d'activité", d.type],
     ['Taille (couverts/m²)', d.couverts],
     ['Créneau souhaité', d.creneau],
     ['Message', d.message],
@@ -120,10 +136,6 @@ function internalContactBody(d) {
     ['Langue UI', d.lang],
   ]);
 }
-
-// -----------------------------------------------------------------------------
-// Templates: accusé de réception client
-// -----------------------------------------------------------------------------
 
 function clientReplyDemo({ nom }) {
   const firstName = (nom || '').trim().split(/\s+/)[0] || 'bonjour';
@@ -167,29 +179,18 @@ function clientReplyContact({ nom, sujet }) {
 }
 
 // -----------------------------------------------------------------------------
-// Resend send helper
+// Send helper
 // -----------------------------------------------------------------------------
 
-async function sendViaResend({ to, subject, html, replyTo }) {
-  const r = await fetch(RESEND_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: MAIL_FROM,
-      to: Array.isArray(to) ? to : [to],
-      subject,
-      html,
-      reply_to: replyTo || undefined,
-    }),
+async function sendMail({ to, subject, html, replyTo }) {
+  const tx = getTransporter();
+  return tx.sendMail({
+    from: MAIL_FROM,
+    to,
+    subject,
+    html,
+    replyTo: replyTo || undefined,
   });
-  if (!r.ok) {
-    const text = await r.text();
-    throw new Error(`Resend ${r.status}: ${text}`);
-  }
-  return r.json();
 }
 
 // -----------------------------------------------------------------------------
@@ -209,8 +210,8 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers: cors, body: JSON.stringify({ ok: false, error: 'Method not allowed' }) };
   }
-  if (!process.env.RESEND_API_KEY) {
-    console.error('Missing RESEND_API_KEY env var');
+  if (!SMTP_PASS) {
+    console.error('Missing SMTP_PASS env var');
     return { statusCode: 500, headers: cors, body: JSON.stringify({ ok: false, error: 'Email service not configured' }) };
   }
 
@@ -230,7 +231,7 @@ exports.handler = async (event) => {
     return { statusCode: 200, headers: cors, body: JSON.stringify({ ok: true }) };
   }
 
-  const form = String(data.form || '').toLowerCase(); // 'demo' | 'contact'
+  const form = String(data.form || '').toLowerCase();
   if (!['demo', 'contact'].includes(form)) {
     return { statusCode: 400, headers: cors, body: JSON.stringify({ ok: false, error: 'Invalid form type' }) };
   }
@@ -241,7 +242,6 @@ exports.handler = async (event) => {
     return { statusCode: 400, headers: cors, body: JSON.stringify({ ok: false, error: 'Nom et entreprise requis' }) };
   }
 
-  // Route technical questions to support
   const isTech = form === 'contact' && /technique/i.test(data.sujet || '');
   const notifTo = isTech ? MAIL_TO_SUPPORT : MAIL_TO;
 
@@ -251,13 +251,13 @@ exports.handler = async (event) => {
       const internalHtml = baseEmail({
         preheader: `Nouvelle demande de démo de ${data.nom}`,
         title: 'Nouvelle demande de démo',
-        intro: `Reçue via le site, modale "Réserver une démo".`,
+        intro: 'Reçue via le site, modale "Réserver une démo".',
         body: internalDemoBody(data),
         ctaLabel: 'Répondre au client',
         ctaUrl: `mailto:${data.email}`,
       });
-      await sendViaResend({ to: notifTo, subject, html: internalHtml, replyTo: data.email });
-      await sendViaResend({
+      await sendMail({ to: notifTo, subject, html: internalHtml, replyTo: data.email });
+      await sendMail({
         to: data.email,
         subject: 'Votre demande de démo Imarra a bien été reçue',
         html: clientReplyDemo({ nom: data.nom }),
@@ -273,8 +273,8 @@ exports.handler = async (event) => {
         ctaLabel: 'Répondre au client',
         ctaUrl: `mailto:${data.email}`,
       });
-      await sendViaResend({ to: notifTo, subject, html: internalHtml, replyTo: data.email });
-      await sendViaResend({
+      await sendMail({ to: notifTo, subject, html: internalHtml, replyTo: data.email });
+      await sendMail({
         to: data.email,
         subject: 'Votre message a bien été reçu par Imarra',
         html: clientReplyContact({ nom: data.nom, sujet: data.sujet }),
