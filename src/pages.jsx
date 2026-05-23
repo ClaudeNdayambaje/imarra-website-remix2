@@ -518,10 +518,44 @@ function AboutPage() {
 // CONTACT
 // =============================================================================
 function ContactPage() {
+  const [lang] = useLang();
   const [form, setForm] = React.useState({ nom: '', entreprise: '', tva: '', email: '', telephone: '', sujet: t({fr:'Demande de démo',nl:'Demo aanvragen',en:'Demo request',de:'Demo-Anfrage'}), message: '' });
   const [sent, setSent] = React.useState(false);
+  const [sending, setSending] = React.useState(false);
+  const [sendError, setSendError] = React.useState('');
   const update = (k) => (e) => setForm({ ...form, [k]: e.target.value });
-  const submit = (e) => { e.preventDefault(); setSent(true); };
+  const submit = async (e) => {
+    e.preventDefault();
+    if (sending) return;
+    setSending(true);
+    setSendError('');
+    try {
+      const honeypot = e.target.querySelector('input[name="website"]');
+      const res = await fetch('/.netlify/functions/send-mail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          form: 'contact',
+          lang,
+          website: honeypot ? honeypot.value : '',
+          ...form,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      setSent(true);
+    } catch (err) {
+      console.error('Contact submit failed:', err);
+      setSendError(t({
+        fr: "Envoi impossible pour l'instant. Réessayez ou écrivez-nous à contact@imarra.be.",
+        nl: 'Versturen lukt nu niet. Probeer opnieuw of mail contact@imarra.be.',
+        en: 'Could not send right now. Please try again or email contact@imarra.be.',
+        de: 'Senden derzeit nicht möglich. Bitte erneut versuchen oder an contact@imarra.be mailen.',
+      }));
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <div className="page-fade">
@@ -566,6 +600,8 @@ function ContactPage() {
                 </div>
               ) : (
                 <form onSubmit={submit}>
+                  {/* Honeypot — anti-spam */}
+                  <input type="text" name="website" tabIndex="-1" autoComplete="off" style={{ position: 'absolute', left: -9999, opacity: 0, pointerEvents: 'none' }} />
                   <h3 className="h3" style={{ marginBottom: 6 }}>{t({fr:'Écrivez-nous', nl:'Schrijf ons', en:'Write to us', de:'Schreiben Sie uns'})}</h3>
                   <p style={{ color: 'var(--fg-2)', marginBottom: 24, fontSize: 14 }}>{t({fr:"Tous les champs marqués d'un * sont obligatoires.", nl:"Alle velden gemarkeerd met * zijn verplicht.", en:"All fields marked with * are required.", de:"Alle mit * markierten Felder sind Pflichtfelder."})}</p>
                   <div className="field-row">
@@ -607,9 +643,16 @@ function ContactPage() {
                     <label className="label">{t({fr:'Message *', nl:'Bericht *', en:'Message *', de:'Nachricht *'})}</label>
                     <textarea className="textarea" required rows={5} value={form.message} onChange={update('message')} placeholder={t({fr:'Décrivez votre besoin en quelques lignes…', nl:'Beschrijf uw behoefte in enkele regels…', en:'Describe your need in a few lines…', de:'Beschreiben Sie Ihr Anliegen in wenigen Zeilen…'})} />
                   </div>
-                  <button className="btn btn-primary btn-lg" type="submit" style={{ width: '100%' }}>
-                    {t({fr:'Envoyer le message', nl:'Bericht verzenden', en:'Send the message', de:'Nachricht senden'})} <Icon name="arrow" size={16} />
+                  <button className="btn btn-primary btn-lg" type="submit" disabled={sending} style={{ width: '100%', opacity: sending ? 0.7 : 1, cursor: sending ? 'wait' : 'pointer' }}>
+                    {sending
+                      ? t({fr:'Envoi en cours…', nl:'Verzenden…', en:'Sending…', de:'Wird gesendet…'})
+                      : <>{t({fr:'Envoyer le message', nl:'Bericht verzenden', en:'Send the message', de:'Nachricht senden'})} <Icon name="arrow" size={16} /></>}
                   </button>
+                  {sendError && (
+                    <p style={{ fontSize: 13, color: '#dc2626', marginTop: 12, marginBottom: 0, textAlign: 'center' }}>
+                      {sendError}
+                    </p>
+                  )}
                   <p style={{ fontSize: 12, color: 'var(--fg-2)', marginTop: 14, marginBottom: 0, textAlign: 'center' }}>
                     {t({fr:'Vos données restent chez Imarra · RGPD compliant', nl:'Uw gegevens blijven bij Imarra · AVG-compliant', en:'Your data stays with Imarra · GDPR compliant', de:'Ihre Daten bleiben bei Imarra · DSGVO-konform'})}
                   </p>

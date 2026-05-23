@@ -35,6 +35,8 @@ window.navTo = navTo;
 function DemoModal() {
   const [open, setOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
   const [lang] = useLang();
   const [form, setForm] = useState({
     nom: '', entreprise: '', tva: '', telephone: '', email: '',
@@ -61,7 +63,38 @@ function DemoModal() {
   if (!open) return null;
 
   const update = (k) => (e) => setForm({ ...form, [k]: e.target.value });
-  const submit = (e) => { e.preventDefault(); setSubmitted(true); };
+  const submit = async (e) => {
+    e.preventDefault();
+    if (sending) return;
+    setSending(true);
+    setSendError('');
+    try {
+      const honeypot = e.target.querySelector('input[name="website"]');
+      const res = await fetch('/.netlify/functions/send-mail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          form: 'demo',
+          lang,
+          website: honeypot ? honeypot.value : '',
+          ...form,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      setSubmitted(true);
+    } catch (err) {
+      console.error('Demo submit failed:', err);
+      setSendError(t({
+        fr: "Envoi impossible pour l'instant. Réessayez ou écrivez-nous à contact@imarra.be.",
+        nl: 'Versturen lukt nu niet. Probeer opnieuw of mail contact@imarra.be.',
+        en: 'Could not send right now. Please try again or email contact@imarra.be.',
+        de: 'Senden derzeit nicht möglich. Bitte erneut versuchen oder an contact@imarra.be mailen.',
+      }));
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <div
@@ -164,9 +197,16 @@ function DemoModal() {
               </select>
             </div>
 
-            <button className="btn btn-primary" type="submit" style={{ width: '100%', padding: '16px 22px', fontSize: 16 }}>
-              {t('demo.submit')} <Icon name="arrow" size={16} />
+            <button className="btn btn-primary" type="submit" disabled={sending} style={{ width: '100%', padding: '16px 22px', fontSize: 16, opacity: sending ? 0.7 : 1, cursor: sending ? 'wait' : 'pointer' }}>
+              {sending
+                ? t({fr:'Envoi en cours…', nl:'Verzenden…', en:'Sending…', de:'Wird gesendet…'})
+                : <>{t('demo.submit')} <Icon name="arrow" size={16} /></>}
             </button>
+            {sendError && (
+              <p style={{ fontSize: 13, color: 'var(--imarra-danger, #dc2626)', textAlign: 'center', marginTop: 12, marginBottom: 0 }}>
+                {sendError}
+              </p>
+            )}
             <p style={{ fontSize: 12, color: 'var(--fg-2)', textAlign: 'center', marginTop: 14, marginBottom: 0 }}>
               {t('demo.gdpr')}
             </p>
