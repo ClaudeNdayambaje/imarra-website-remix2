@@ -677,9 +677,9 @@ function ContactPage() {
                                      v: 'Rue René Descartes 2',
                                      sub: t({fr:'7000 Mons · Belgique', nl:'7000 Bergen · België', en:'7000 Mons · Belgium', de:'7000 Mons · Belgien'}) },
                   { icon: 'headset', l: t({fr:'Support client', nl:'Klantenservice', en:'Customer support', de:'Kundenservice'}),
-                                     v: 'support@imarra.be',
+                                     v: 'support@imarra.io',
                                      sub: t({fr:'Pour les clients existants', nl:'Voor bestaande klanten', en:'For existing customers', de:'Für bestehende Kunden'}),
-                                     href: 'mailto:support@imarra.be' },
+                                     href: 'mailto:support@imarra.io' },
                 ].map(c => (
                   <div key={c.l} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
                     <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--accent-tint)', color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
