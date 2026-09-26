@@ -607,23 +607,31 @@ function Footer() {
           <div style={{ display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="shield" size={14} /> {t('footer.gdpr_short')}</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Icon name="flag" size={14} /> {t('footer.designed')}</span>
-            <a
-              href="https://pos.imarra.io/#/partner/login"
-              target="_blank"
-              rel="noopener"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                color: 'var(--fg-muted)', textDecoration: 'none',
-                padding: '4px 10px',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 999,
-                transition: 'border-color 180ms, color 180ms',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-subtle)'; e.currentTarget.style.color = 'var(--fg-muted)'; }}
-            >
-              <Icon name="lock" size={12} /> SalesPilot
-            </a>
+            {[
+              ['SalesPilot', 'https://sales.imarra.io'],
+              ['AdminPilot', 'https://distributor.imarra.io'],
+              ['CallPilot', 'https://callcenter.imarra.io'],
+              ['TechPilot', 'https://support.imarra.io'],
+            ].map(([label, url]) => (
+              <a
+                key={url}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  color: 'var(--fg-muted)', textDecoration: 'none',
+                  padding: '4px 10px',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 999,
+                  transition: 'border-color 180ms, color 180ms',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-subtle)'; e.currentTarget.style.color = 'var(--fg-muted)'; }}
+              >
+                <Icon name="lock" size={12} /> {label}
+              </a>
+            ))}
           </div>
         </div>
       </div>
